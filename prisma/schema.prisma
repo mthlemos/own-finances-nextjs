@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model BillingType {
+  id       String    @id @default(uuid())
+  name     String    @db.VarChar(100)
+  invoices Invoice[]
+}
+
+model Category {
+  id       String    @id @default(uuid())
+  name     String    @db.VarChar(100)
+  invoices Invoice[]
+}
+
+model Invoice {
+  id            String      @id @default(uuid())
+  name          String      @db.VarChar(100)
+  purchaseDate  DateTime    @db.Date
+  endDate       DateTime?   @db.Date
+  billingTypeId String
+  billingType   BillingType @relation(fields: [billingTypeId], references: [id])
+  installments  Int         @db.Integer
+  recurring     Boolean     @db.Boolean
+  category      Category    @relation(fields: [categoryId], references: [id])
+  categoryId    String
+}
