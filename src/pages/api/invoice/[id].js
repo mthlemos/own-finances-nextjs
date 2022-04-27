@@ -1,9 +1,6 @@
 const { StatusCodes } = require('http-status-codes');
-const { PrismaClient } = require('@prisma/client');
+const { prisma } = require('../../../db');
 const dayjs = require('dayjs');
-
-// Instantiate a single prisma client for all the routes
-const prisma = new PrismaClient();
 
 export default async function handler(req, res) {
     const { id } = req.query;

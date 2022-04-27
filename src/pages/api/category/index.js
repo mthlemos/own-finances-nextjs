@@ -1,8 +1,5 @@
 const { StatusCodes } = require('http-status-codes');
-const { PrismaClient } = require('@prisma/client');
-
-// Instantiate a single prisma client for all the routes
-const prisma = new PrismaClient();
+const { prisma } = require('../../../db');
 
 export default async function handler(req, res) {
     switch (req.method) {

@@ -5,10 +5,10 @@ import { toast } from 'react-semantic-toasts';
 import dayjs from 'dayjs';
 import { StatusCodes } from 'http-status-codes';
 
-const INVOICE_API_URL = '/api/invoice'
+const INVOICE_API_URL = '/api/invoice';
 
 export default function newInvoice() {
-    const [formFields, setFormFields] = useState({
+    const initialState = {
         name: '',
         purchaseDateField: '',
         purchaseDate: '',
@@ -16,6 +16,9 @@ export default function newInvoice() {
         categoryId: '',
         installments: 0,
         recurring: false
+    };
+    const [formFields, setFormFields] = useState({
+        ...initialState
     });
     // This object will be populated with
     // required missing fields
@@ -26,13 +29,12 @@ export default function newInvoice() {
 
     function handleOnChange(e, data) {
         const { name, value, checked } = data;
-        console.log(data);
         if (name) {
             switch (name) {
                 case 'purchaseDateField':
                     // If the field is purchaseDateField
                     // We have to parse it into unix timestamp
-                    // In order to send do the backend
+                    // In order to send to the backend
                     // And also update de purchaseDateField value
                     // Parse the date
                     const purchaseDateObj = dayjs(value);
@@ -66,10 +68,13 @@ export default function newInvoice() {
         setFormErrors({});
         // Temp formErrors
         const tempFormErrors = {};
-        if (!formFields.name) { tempFormErrors.name = true }
-        if (!formFields.categoryId) { tempFormErrors.categoryId = true }
-        if (!formFields.billingTypeId) { tempFormErrors.billingTypeId = true }
-        if (!formFields.purchaseDateField) { tempFormErrors.purchaseDateField = true }
+        const requiredFields = ['name', 'categoryId', 'billingTypeId', 'purchaseDateField'];
+        // Check for missing required fields
+        requiredFields.forEach(field => {
+            if (!formFields[field]) {
+                tempFormErrors[field] = true;
+            }
+        });
         // Set form errors
         setFormErrors({
             ...tempFormErrors
@@ -94,7 +99,7 @@ export default function newInvoice() {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(dataTobeSent)
-        })
+        });
 
         if (fetchResult.status === StatusCodes.OK) {
             toast({
@@ -103,14 +108,8 @@ export default function newInvoice() {
             });
             // Clear fields
             setFormFields({
-                name: '',
-                purchaseDateField: '',
-                purchaseDate: '',
-                billingTypeId: '',
-                categoryId: '',
-                installments: 0,
-                recurring: false
-            })
+                ...initialState
+            });
         } else {
             toast({
                 type: 'error',
@@ -176,7 +175,7 @@ export default function newInvoice() {
                     <Form.Input name='installments' placeholder='Installments' value={formFields.installments} type='number' disabled={formFields.recurring} onChange={handleOnChange} />
                 </Form.Field>
                 <Form.Field>
-                    <Checkbox name='recurring' toggle label='Recurring' value={formFields.recurring} onChange={handleOnChange} />
+                    <Checkbox name='recurring' toggle label='Recurring' checked={formFields.recurring} onChange={handleOnChange} />
                 </Form.Field>
                 <Form.Button type='submit'>Submit</Form.Button>
             </Form>
