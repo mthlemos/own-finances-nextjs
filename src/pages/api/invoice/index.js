@@ -150,8 +150,10 @@ async function createInvoice(req, res) {
         let endDate = purchaseDate.clone();
         if (parsedInstallments > 0) {
             endDate = endDate.add(parsedInstallments, 'month');
-            endDate = endDate.toDate();
         }
+        // Transform endDate into Date object
+        // Since it will or won't become undefined
+        endDate = endDate.toDate()
         if (reqBody.recurring) {
             endDate = undefined;
         }
@@ -166,7 +168,7 @@ async function createInvoice(req, res) {
                 category: {
                     connect: { id: reqBody.categoryId }
                 },
-                installments: reqBody.installments,
+                installments: parsedInstallments,
                 recurring: reqBody.recurring
             }
         })

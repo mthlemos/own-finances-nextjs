@@ -1,0 +1,54 @@
+import { useState } from 'react';
+import { Menu, Icon, Container } from 'semantic-ui-react';
+import { useRouter } from 'next/router';
+import { Link } from 'next/link';
+
+export default function NavBar() {
+    // Before setting the activeItem, check which route
+    // The user is currently on
+    const router = useRouter();
+    const currRoute = router.pathname === '/' ? 'home' : router.pathname.slice(1);
+    const [activeItem, setActiveItem] = useState(currRoute);
+    const routes = [
+        {
+            name: 'Home',
+            shortName: 'home'
+        },
+        {
+            name: 'New Invoice',
+            shortName: 'newInvoice'
+        }
+    ];
+
+    const handleClick = (e, { name }) => {
+        if (activeItem !== name) {
+            setActiveItem(name);
+        }
+    }
+
+    return (
+        <Menu style={{ borderRadius: 0 }} inverted>
+            <Container>
+                <Menu.Item header>
+                    <Icon name='money bill alternate outline' size='large' />
+                </Menu.Item>
+                {routes.map(route => {
+                    return (
+                        <Menu.Item
+                            key={route.shortName}
+                            name={route.shortName}
+                            active={activeItem === route.shortName}
+                            onClick={handleClick}
+                            as={Link}
+                            // Home path is / and since the / is appended
+                            // to the href, home should be an empty string
+                            href={`/${route.shortName === 'home' ? '' : route.shortName}`}
+                        >
+                            {route.name}
+                        </Menu.Item>
+                    )
+                })}
+            </Container>
+        </Menu>
+    )
+}

@@ -8,19 +8,19 @@ datasource db {
 }
 
 model BillingType {
-  id       String    @id @default(uuid())
+  id       String    @id @default(cuid())
   name     String    @db.VarChar(100)
   invoices Invoice[]
 }
 
 model Category {
-  id       String    @id @default(uuid())
+  id       String    @id @default(cuid())
   name     String    @db.VarChar(100)
   invoices Invoice[]
 }
 
 model Invoice {
-  id            String      @id @default(uuid())
+  id            String      @id @default(cuid())
   name          String      @db.VarChar(100)
   purchaseDate  DateTime    @db.Date
   endDate       DateTime?   @db.Date
