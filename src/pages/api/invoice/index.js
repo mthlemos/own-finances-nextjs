@@ -22,7 +22,12 @@ export default async function handler(req, res) {
 async function getInvoice(req, res) {
     // Get all invoices
     try {
-        const invoices = await prisma.invoice.findMany();
+        const invoices = await prisma.invoice.findMany({
+            include: {
+                category: true,
+                billingType: true
+            }
+        });
         res.status(StatusCodes.OK).json({
             message: 'Success',
             data: invoices
@@ -43,32 +48,26 @@ async function getInvoiceWithQuery(req, res) {
         }
         const queryParams = {};
         if (startDate) {
-            let parsedStartDate = parseInt(startDate);
-            if (!Number.isInteger(parsedStartDate)) {
+            // startDate should be in YYYY-MM-DD format
+            const isStartDateValid = String(startDate).match(/^\d{4}-\d{2}-\d{2}$/);
+            if (!isStartDateValid) {
                 throw new Error('Incorrect start date');
             }
-            // Clean start date making sure it's only
-            // date, without hour, minute and seconds
-            parsedStartDate = dayjs(parsedStartDate);
-            parsedStartDate.hour(0);
-            parsedStartDate.minute(0);
-            parsedStartDate.second(0);
+            // Convert YYYY-MM-DD date format to dayjs object
+            const parsedStartDate = dayjs(startDate);
             // Set query params
             queryParams.purchaseDate = {
                 gte: parsedStartDate.toDate()
             };
         }
         if (endDate) {
-            let parsedEndDate = parseInt(endDate);
-            if (!Number.isInteger(parsedEndDate)) {
+            // endDate should be in YYYY-MM-DD format
+            const isEndDateValid = String(endDate).match(/^\d{4}-\d{2}-\d{2}$/);
+            if (!isEndDateValid) {
                 throw new Error('Incorrect end date');
             }
-            // Clean end date making sure it's only
-            // date, without hour, minute and seconds
-            parsedEndDate = dayjs(parsedEndDate);
-            parsedEndDate.hour(0);
-            parsedEndDate.minute(0);
-            parsedEndDate.second(0);
+            // // Convert YYYY-MM-DD date format to dayjs object
+            const parsedEndDate = dayjs(endDate);
             // Set query params
             queryParams.endDate = {
                 lte: parsedEndDate.toDate()
@@ -124,20 +123,21 @@ async function createInvoice(req, res) {
     // Create invoice invoices
     try {
         const reqBody = req.body;
-        const parsedPurchaseDate = parseInt(reqBody.purchaseDate);
         const parsedInstallments = parseInt(reqBody.installments);
-        if (!Number.isInteger(parsedPurchaseDate)) {
-            throw new Error('Incorrect date');
+        const parsedPrice = parseFloat(reqBody.price);
+        // purchaseDate should be in YYYY-MM-DD format
+        const isPurchaseDateValid = String(reqBody.purchaseDate).match(/^\d{4}-\d{2}-\d{2}$/);
+        if (!isPurchaseDateValid) {
+            throw new Error('Incorrect purchaseDate');
         }
         if (!Number.isInteger(parsedInstallments)) {
             throw new Error('Incorrect installments');
         }
-        // Set Hour, Minute and Seconds to 0
-        // To make sure we're only getting the date
-        const purchaseDate = dayjs(parsedPurchaseDate);
-        purchaseDate.hour(0);
-        purchaseDate.minute(0);
-        purchaseDate.second(0);
+        if (parsedPrice === NaN || parsedPrice === Infinity) {
+            throw new Error('Incorrect price');
+        }
+        // Convert YYYY-MM-DD format to dayjs object
+        const purchaseDate = dayjs(reqBody.purchaseDate);
         // If there are installments, endDate will be 
         // purchaseDate + installments in months
         // If the invoice is recurring, endDate
@@ -166,7 +166,8 @@ async function createInvoice(req, res) {
                     connect: { id: reqBody.categoryId }
                 },
                 installments: parsedInstallments,
-                recurring: reqBody.recurring
+                recurring: reqBody.recurring,
+                price: parsedPrice
             }
         })
         res.status(StatusCodes.OK).json({

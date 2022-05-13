@@ -30,4 +30,5 @@ model Invoice {
   recurring     Boolean     @db.Boolean
   category      Category    @relation(fields: [categoryId], references: [id])
   categoryId    String
+  price         Decimal     @db.Money
 }

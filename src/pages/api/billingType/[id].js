@@ -25,7 +25,7 @@ async function getBillingType(req, res, id) {
                 id
             }
         });
-        req.res(StatusCodes.OK).json({
+        res.status(StatusCodes.OK).json({
             message: 'Success',
             data: billingType
         });

@@ -26,7 +26,7 @@ async function getInvoice(req, res, id) {
                 id
             }
         });
-        req.res(StatusCodes.OK).json({
+        res.status(StatusCodes.OK).json({
             message: 'Success',
             data: invoice
         });
@@ -43,20 +43,21 @@ async function updateInvoice(req, res, id) {
     // Update invoices
     try {
         const reqBody = req.body;
-        const parsedPurchaseDate = parseInt(reqBody.purchaseDate);
         const parsedInstallments = parseInt(reqBody.installments);
-        if (!Number.isInteger(parsedPurchaseDate)) {
-            throw new Error('Incorrect date');
+        const parsedPrice = parseFloat(reqBody.price);
+        // purchaseDate should be in YYYY-MM-DD format
+        const isPurchaseDateValid = String(reqBody.purchaseDate).match(/^\d{4}-\d{2}-\d{2}$/);
+        if (!isPurchaseDateValid) {
+            throw new Error('Incorrect purchaseDate');
         }
         if (!Number.isInteger(parsedInstallments)) {
             throw new Error('Incorrect installments');
         }
-        // Set Hour, Minute and Seconds to 0
-        // To make sure we're only getting the date
-        const purchaseDate = dayjs(parsedPurchaseDate);
-        purchaseDate.hour(0);
-        purchaseDate.minute(0);
-        purchaseDate.second(0);
+        if (parsedPrice === NaN || parsedPrice === Infinity) {
+            throw new Error('Incorrect price');
+        }
+        // Convert YYYY-MM-DD format to dayjs object
+        const purchaseDate = dayjs(reqBody.purchaseDate);
         // If there are installments, endDate will be 
         // purchaseDate + installments in months
         // If the invoice is recurring, endDate
@@ -86,7 +87,8 @@ async function updateInvoice(req, res, id) {
                     connect: { id: reqBody.categoryId }
                 },
                 installments: reqBody.installments,
-                recurring: reqBody.recurring
+                recurring: reqBody.recurring,
+                price: parsedPrice
             }
         })
         res.status(StatusCodes.OK).json({

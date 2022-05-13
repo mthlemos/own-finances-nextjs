@@ -15,15 +15,23 @@ export default function NavBar() {
             shortName: 'home'
         },
         {
-            name: 'New Invoice',
-            shortName: 'newInvoice'
+            name: 'Invoices',
+            shortName: 'invoices'
+        },
+        {
+            name: 'Categories',
+            shortName: 'categories'
+        },
+        {
+            name: 'Billing Types',
+            shortName: 'billingTypes'
         }
     ];
 
     const handleClick = (e, { name }) => {
-        if (activeItem !== name) {
-            setActiveItem(name);
-        }
+        // if (activeItem !== name) {
+        //     setActiveItem(name);
+        // }
     }
 
     return (
