@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useBillingTypes, useCategories, INVOICE_API_URL } from '../../../utils';
+import { useBillingTypes, useCategories, INVOICE_API_URL } from '../../utils';
 import { Header, Form, Dropdown, Checkbox, Modal, Button } from 'semantic-ui-react';
 import { toast, SemanticToastContainer } from 'react-semantic-toasts';
 import dayjs from 'dayjs';

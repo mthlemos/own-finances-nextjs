@@ -3,7 +3,7 @@ import { Header, Container, Table, Loader, Divider, Button } from 'semantic-ui-r
 import { StatusCodes } from 'http-status-codes';
 import { mutate } from 'swr';
 import dayjs from 'dayjs';
-import NewInvoiceModal from './components/NewInvoiceModal';
+import NewInvoiceModal from '../../components/invoices/NewInvoiceModal';
 import { toast } from 'react-semantic-toasts';
 
 export default function Invoices() {

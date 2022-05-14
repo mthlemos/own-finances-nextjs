@@ -3,7 +3,7 @@ import { toast } from 'react-semantic-toasts';
 import { StatusCodes } from 'http-status-codes';
 import { useBillingTypes, BILLING_TYPE_API_URL } from '../../utils';
 import { mutate } from 'swr';
-import NewBillingTypeModal from './components/NewBillingTypeModal';
+import NewBillingTypeModal from '../../components/billingTypes/NewBillingTypeModal';
 
 export default function BillingTypes() {
     const billingTypes = useBillingTypes();

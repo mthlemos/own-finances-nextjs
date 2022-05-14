@@ -3,7 +3,7 @@ import { toast } from 'react-semantic-toasts';
 import { StatusCodes } from 'http-status-codes';
 import { useCategories, CATEGORY_API_URL } from '../../utils';
 import { mutate } from 'swr';
-import NewCategoryModal from './components/NewCategoryModal';
+import NewCategoryModal from '../../components/categories/NewCategoryModal';
 
 export default function Categories() {
     const categories = useCategories();

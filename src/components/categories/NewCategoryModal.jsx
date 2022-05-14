@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { Header, Form, Button, Modal } from 'semantic-ui-react';
 import { toast, SemanticToastContainer } from 'react-semantic-toasts';
 import { StatusCodes } from 'http-status-codes';
-import { BILLING_TYPE_API_URL } from '../../../utils';
+import { CATEGORY_API_URL } from '../../utils';
 import { mutate } from 'swr';
 
-export default function NewBillingTypeModal() {
+export default function NewCategoryModal() {
     const initialState = {
         name: ''
     };
@@ -56,7 +56,7 @@ export default function NewBillingTypeModal() {
             ...formFields
         };
 
-        const fetchResult = await fetch(BILLING_TYPE_API_URL, {
+        const fetchResult = await fetch(CATEGORY_API_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -67,20 +67,20 @@ export default function NewBillingTypeModal() {
         if (fetchResult.status === StatusCodes.OK) {
             toast({
                 type: 'success',
-                description: 'Billing type created successfuly!'
+                description: 'Category created successfuly!'
             });
             // Clear fields
             setFormFields({
                 ...initialState
             });
-            // Update billing types
-            mutate(BILLING_TYPE_API_URL);
+            // Update categories
+            mutate(CATEGORY_API_URL);
             // Close modal
             setOpen(false);
         } else {
             toast({
                 type: 'error',
-                description: 'There was an error creating the billing type'
+                description: 'There was an error creating the category'
             });
         }
     }
@@ -89,16 +89,16 @@ export default function NewBillingTypeModal() {
         <Modal
             closeIcon
             open={open}
-            trigger={<Button>New Billing Type</Button>}
+            trigger={<Button>New Category</Button>}
             onClose={() => setOpen(false)}
             onOpen={() => setOpen(true)}
         >
-            <Header>Create a new billing type</Header>
+            <Header>Create a new category</Header>
             <Modal.Content>
                 <SemanticToastContainer />
                 <Form onSubmit={handleSubmit}>
                     <Form.Field required error={formErrors.name}>
-                        <label>Billing type name</label>
+                        <label>Category name</label>
                         <Form.Input name='name' placeholder='Invoice name' value={formFields.name} onChange={handleOnChange} />
                     </Form.Field>
                     <Form.Button type='submit'>Submit</Form.Button>

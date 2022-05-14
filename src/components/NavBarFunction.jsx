@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Menu, Icon, Container } from 'semantic-ui-react';
 import { useRouter } from 'next/router';
-import { Link } from 'next/link';
+import Link from 'next/link';
 
 export default function NavBar() {
     // Before setting the activeItem, check which route
@@ -28,10 +28,10 @@ export default function NavBar() {
         }
     ];
 
-    const handleClick = (e, { name }) => {
-        // if (activeItem !== name) {
-        //     setActiveItem(name);
-        // }
+    const handleClick = (name) => {
+        if (activeItem !== name) {
+            setActiveItem(name);
+        }
     }
 
     return (
@@ -42,18 +42,20 @@ export default function NavBar() {
                 </Menu.Item>
                 {routes.map(route => {
                     return (
-                        <Menu.Item
+                        <Link
                             key={route.shortName}
-                            name={route.shortName}
-                            active={activeItem === route.shortName}
-                            onClick={handleClick}
-                            as={Link}
                             // Home path is / and since the / is appended
                             // to the href, home should be an empty string
                             href={`/${route.shortName === 'home' ? '' : route.shortName}`}
+                            passHref
                         >
-                            {route.name}
-                        </Menu.Item>
+                            <Menu.Item
+                                active={activeItem === route.shortName}
+                                onClick={() => handleClick(route.shortName)}
+                            >
+                                {route.name}
+                            </Menu.Item>
+                        </Link>
                     )
                 })}
             </Container>
