@@ -7,6 +7,7 @@ import NewInvoiceModal from '../../components/invoices/NewInvoiceModal';
 import { toast } from 'react-semantic-toasts';
 
 export default function Invoices() {
+    const invoices = useInvoices();
 
     async function deleteInvoice(id) {
         const fetchResult = await fetch(`${INVOICE_API_URL}/${id}`, {
