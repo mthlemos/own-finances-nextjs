@@ -6,8 +6,7 @@ import dayjs from 'dayjs';
 import NewInvoiceModal from './components/NewInvoiceModal';
 import { toast } from 'react-semantic-toasts';
 
-export default function newInvoice() {
-    const invoices = useInvoices();
+export default function Invoices() {
 
     async function deleteInvoice(id) {
         const fetchResult = await fetch(`${INVOICE_API_URL}/${id}`, {

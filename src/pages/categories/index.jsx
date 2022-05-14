@@ -5,7 +5,7 @@ import { useCategories, CATEGORY_API_URL } from '../../utils';
 import { mutate } from 'swr';
 import NewCategoryModal from './components/NewCategoryModal';
 
-export default function newCategory() {
+export default function Categories() {
     const categories = useCategories();
 
     async function deleteCategory(id) {

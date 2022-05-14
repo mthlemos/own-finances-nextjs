@@ -5,7 +5,7 @@ import { StatusCodes } from 'http-status-codes';
 import { CATEGORY_API_URL } from '../../../utils';
 import { mutate } from 'swr';
 
-export default function newCategoryModal() {
+export default function NewCategoryModal() {
     const initialState = {
         name: ''
     };

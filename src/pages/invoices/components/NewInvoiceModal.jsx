@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 import { StatusCodes } from 'http-status-codes';
 import { mutate } from 'swr';
 
-export default function newInvoiceModal() {
+export default function NewInvoiceModal() {
     const initialState = {
         name: '',
         purchaseDateField: '',

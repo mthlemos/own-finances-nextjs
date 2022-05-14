@@ -5,7 +5,7 @@ import { StatusCodes } from 'http-status-codes';
 import { BILLING_TYPE_API_URL } from '../../../utils';
 import { mutate } from 'swr';
 
-export default function newBillingTypeModal() {
+export default function NewBillingTypeModal() {
     const initialState = {
         name: ''
     };

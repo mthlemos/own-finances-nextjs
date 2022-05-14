@@ -5,7 +5,7 @@ import { useBillingTypes, BILLING_TYPE_API_URL } from '../../utils';
 import { mutate } from 'swr';
 import NewBillingTypeModal from './components/NewBillingTypeModal';
 
-export default function newBillingType() {
+export default function BillingTypes() {
     const billingTypes = useBillingTypes();
 
     async function deleteBillingType(id) {
