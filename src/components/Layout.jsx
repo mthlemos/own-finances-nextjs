@@ -15,7 +15,8 @@ export default function Layout({ children }) {
                             time: 10000
                         });
                     }
-                }
+                },
+                refreshInterval: 0 // Should be overrided only when needed
             }}>
                 <NavBar />
                 <Container>

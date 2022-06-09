@@ -59,16 +59,22 @@ async function updateInvoice(req, res, id) {
         // Convert YYYY-MM-DD format to dayjs object
         const purchaseDate = dayjs(reqBody.purchaseDate);
         // If there are installments, endDate will be 
-        // purchaseDate + installments in months
+        // purchaseDate + installments (-1) in months
         // If the invoice is recurring, endDate
         // will only be filled when it's not recurring
         // anymore
         // Otherwise, endDate === purchaseDate
         let endDate = purchaseDate.clone();
         if (parsedInstallments > 0) {
-            endDate = endDate.add(parsedInstallments, 'month');
-            endDate = endDate.toDate();
+            // The added months will be
+            // parsedInstallments - 1, because
+            // the first installment is already on
+            // the first month
+            endDate = endDate.add(parsedInstallments - 1, 'month');
         }
+        // Transform endDate into Date object
+        // Since it will or won't become undefined
+        endDate = endDate.toDate()
         if (reqBody.recurring) {
             endDate = undefined;
         }
@@ -79,7 +85,7 @@ async function updateInvoice(req, res, id) {
             data: {
                 name: reqBody.name,
                 purchaseDate: purchaseDate.toDate(),
-                endDate: endDate.toDate(),
+                endDate,
                 billingType: {
                     connect: { id: reqBody.billingTypeId }
                 },

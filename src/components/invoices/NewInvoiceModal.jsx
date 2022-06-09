@@ -4,9 +4,9 @@ import { Header, Form, Dropdown, Checkbox, Modal, Button } from 'semantic-ui-rea
 import { toast, SemanticToastContainer } from 'react-semantic-toasts';
 import dayjs from 'dayjs';
 import { StatusCodes } from 'http-status-codes';
-import { mutate } from 'swr';
 
-export default function NewInvoiceModal() {
+export default function NewInvoiceModal(props) {
+    const { invoiceMutate } = props;
     const initialState = {
         name: '',
         purchaseDateField: '',
@@ -114,7 +114,7 @@ export default function NewInvoiceModal() {
                 ...initialState
             });
             // Update invoices
-            mutate(INVOICE_API_URL);
+            invoiceMutate();
             // Close modal
             setOpen(false);
         } else {

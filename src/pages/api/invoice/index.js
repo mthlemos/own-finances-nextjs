@@ -42,70 +42,98 @@ async function getInvoice(req, res) {
 
 async function getInvoiceWithQuery(req, res) {
     try {
-        const { startDate, endDate, categoryId, billingTypeId } = req.query;
-        if (!startDate && endDate) {
-            throw new Error('Missing startDate param!')
+        const { fromDate, toDate, categoryId, billingTypeId } = req.query;
+        if (!fromDate && toDate) {
+            throw new Error('Missing fromDate param!')
         }
-        const queryParams = {};
-        if (startDate) {
-            // startDate should be in YYYY-MM-DD format
-            const isStartDateValid = String(startDate).match(/^\d{4}-\d{2}-\d{2}$/);
-            if (!isStartDateValid) {
-                throw new Error('Incorrect start date');
+        const queryObject = {
+            AND: [],
+            OR: []
+        };
+        if (fromDate) {
+            // fromDate should be in YYYY-MM format
+            const isFromDateValid = String(fromDate).match(/^\d{4}-\d{2}$/);
+            if (!isFromDateValid) {
+                throw new Error('Incorrect fromDate');
             }
-            // Convert YYYY-MM-DD date format to dayjs object
-            const parsedStartDate = dayjs(startDate);
+            // Convert YYYY-MM date format to dayjs object
+            const parsedFromDate = dayjs(fromDate);
             // Set query params
-            queryParams.purchaseDate = {
-                gte: parsedStartDate.toDate()
-            };
+            queryObject.OR.push({
+                purchaseDate: {
+                    gte: parsedFromDate.toDate()
+                }
+            });
+            // In order to show the invoices in which the
+            // installments are in the selected date range
+            // endDate should be less than equal the fromDate
+            queryObject.OR.push({
+                endDate: {
+                    gte: parsedFromDate.toDate()
+                }
+            });
+            // If no toDate was provided, limit search to the
+            // end of the month of the fromDate
+            if (!toDate) {
+                queryObject.AND.push({
+                    purchaseDate: {
+                        lte: parsedFromDate.endOf('month').toDate()
+                    }
+                });
+            }
         }
-        if (endDate) {
-            // endDate should be in YYYY-MM-DD format
-            const isEndDateValid = String(endDate).match(/^\d{4}-\d{2}-\d{2}$/);
+        if (toDate) {
+            // endDate should be in YYYY-MM format
+            const isEndDateValid = String(toDate).match(/^\d{4}-\d{2}$/);
             if (!isEndDateValid) {
                 throw new Error('Incorrect end date');
             }
-            // // Convert YYYY-MM-DD date format to dayjs object
-            const parsedEndDate = dayjs(endDate);
-            // Set query params
-            queryParams.endDate = {
-                lte: parsedEndDate.toDate()
-            };
+            // Convert YYYY-MM date format to dayjs object
+            const parsedEndDate = dayjs(toDate);
+            // Set query to end of month
+            queryObject.AND.push({
+                purchaseDate: {
+                    lte: parsedEndDate.endOf('month').toDate()
+                }
+            });
         }
         if (billingTypeId) {
             if (typeof billingTypeId !== 'string') {
                 throw new Error('Incorrect billing type id');
             }
-            queryParams.billingType = {
-                id: billingTypeId
-            };
+            queryObject.AND.push({
+                billingType: {
+                    id: billingTypeId
+                }
+            });
         }
         if (categoryId) {
             if (typeof categoryId !== 'string') {
                 throw new Error('Incorrect category type id');
             }
-            queryParams.category = {
-                id: categoryId
-            };
+            queryObject.AND.push({
+                category: {
+                    id: categoryId
+                }
+            });
         }
-        const queryObject = {};
-        // If startDate was added,
+        // If fromDate or toDate was added,
         // recurring invoices should also
         // be returned
-        if (startDate) {
-            queryObject.OR = [
-                queryParams,
-                {
-                    recurring: true
-                }
-            ];
+        if (fromDate) {
+            queryObject.OR.push({
+                recurring: true
+            });
         } else {
             // Else, only the ones with category and/or billing type
             Object.assign(queryObject, queryParams);
         }
         const invoices = await prisma.invoice.findMany({
-            where: queryObject
+            where: queryObject,
+            include: {
+                category: true,
+                billingType: true
+            }
         });
         res.status(StatusCodes.OK).json({
             message: 'Success',
@@ -139,14 +167,18 @@ async function createInvoice(req, res) {
         // Convert YYYY-MM-DD format to dayjs object
         const purchaseDate = dayjs(reqBody.purchaseDate);
         // If there are installments, endDate will be 
-        // purchaseDate + installments in months
+        // purchaseDate + installments (-1) in months
         // If the invoice is recurring, endDate
         // will only be filled when it's not recurring
         // anymore
         // Otherwise, endDate === purchaseDate
         let endDate = purchaseDate.clone();
         if (parsedInstallments > 0) {
-            endDate = endDate.add(parsedInstallments, 'month');
+            // The added months will be
+            // parsedInstallments - 1, because
+            // the first installment is already on
+            // the first month
+            endDate = endDate.add(parsedInstallments - 1, 'month');
         }
         // Transform endDate into Date object
         // Since it will or won't become undefined

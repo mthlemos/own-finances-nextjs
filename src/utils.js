@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 
-const fetcher = (...args) => fetch(...args).then(res => res.json());
+const fetcher = (url, queryParams = '') => fetch(`${url}${queryParams}`).then(res => res.json());
 
 const INVOICE_API_URL = '/api/invoice';
 const BILLING_TYPE_API_URL = '/api/billingType';
@@ -26,13 +26,25 @@ function useCategories() {
     }
 }
 
-function useInvoices() {
-    const { data, error } = useSWR(INVOICE_API_URL, fetcher);
+function useInvoices(queryParams) {
+    // Reduce queryParams to a uri formatted string
+    const queryString = Object.keys(queryParams).reduce((acc, currParam) => {
+        const currParamContent = queryParams[currParam];
+        if (!acc) {
+            acc += `?${currParam}=${currParamContent}`;
+        } else {
+            acc += `&${currParam}=${currParamContent}`;
+        }
+        acc = encodeURI(acc);
+        return acc;
+    }, '');
+    const { data, error, mutate } = useSWR([INVOICE_API_URL, queryString], fetcher);
 
     return {
         data: (data && data.data) || [],
         isLoading: !data && !error,
-        isError: error
+        isError: error,
+        mutate
     }
 }
 
