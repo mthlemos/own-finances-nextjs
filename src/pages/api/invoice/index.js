@@ -83,17 +83,17 @@ async function getInvoiceWithQuery(req, res) {
             }
         }
         if (toDate) {
-            // endDate should be in YYYY-MM format
-            const isEndDateValid = String(toDate).match(/^\d{4}-\d{2}$/);
-            if (!isEndDateValid) {
-                throw new Error('Incorrect end date');
+            // toDate should be in YYYY-MM format
+            const isToDateValid = String(toDate).match(/^\d{4}-\d{2}$/);
+            if (!isToDateValid) {
+                throw new Error('Incorrect to date');
             }
             // Convert YYYY-MM date format to dayjs object
-            const parsedEndDate = dayjs(toDate);
+            const parsedToDate = dayjs(toDate);
             // Set query to end of month
             queryObject.AND.push({
                 purchaseDate: {
-                    lte: parsedEndDate.endOf('month').toDate()
+                    lte: parsedToDate.endOf('month').toDate()
                 }
             });
         }
