@@ -24,8 +24,16 @@ async function getInvoice(req, res) {
     try {
         const invoices = await prisma.invoice.findMany({
             include: {
-                category: true,
-                billingType: true
+                category: {
+                    select: {
+                        name: true
+                    }
+                },
+                billingType: {
+                    select: {
+                        name: true
+                    }
+                }
             }
         });
         res.status(StatusCodes.OK).json({
@@ -42,7 +50,7 @@ async function getInvoice(req, res) {
 
 async function getInvoiceWithQuery(req, res) {
     try {
-        const { fromDate, toDate, categoryId, billingTypeId } = req.query;
+        const { fromDate, toDate, categoryId, billingTypeId, orderBy, limit } = req.query;
         if (!fromDate && toDate) {
             throw new Error('Missing fromDate param!')
         }
@@ -124,16 +132,46 @@ async function getInvoiceWithQuery(req, res) {
             queryObject.OR.push({
                 recurring: true
             });
-        } else {
-            // Else, only the ones with category and/or billing type
-            Object.assign(queryObject, queryParams);
         }
+
+        // If orderBy is provided, check if it's valid
+        // otherwise, orderBy purshaseDate is the default
+        let parsedOrderBy = 'purchaseDate'
+        if (orderBy) {
+            const isOrderByValid = ['purchaseDate', 'price'].includes(orderBy);
+            if (!isOrderByValid) {
+                throw new Error("Incorrect orderBy");
+            }
+            parsedOrderBy = orderBy;
+        }
+
+        // If limit was provided, check if it's valid
+        // and then limit the query
+        let parsedLimit;
+        if (limit) {
+            if (!Number.isInteger(limit)) {
+                parsedLimit = parseInt(limit);
+            }
+        }
+
         const invoices = await prisma.invoice.findMany({
             where: queryObject,
             include: {
-                category: true,
-                billingType: true
-            }
+                category: {
+                    select: {
+                        name: true
+                    }
+                },
+                billingType: {
+                    select: {
+                        name: true
+                    }
+                }
+            },
+            orderBy: {
+                [parsedOrderBy]: 'desc'
+            },
+            take: parsedLimit
         });
         res.status(StatusCodes.OK).json({
             message: 'Success',

@@ -64,6 +64,11 @@ async function getInvoiceSummary(req, res) {
         }
     });
 
+    // Also include recurring invoices
+    queryParams.OR.push({
+        recurring: true
+    })
+
     // Get either categories or billingTypes
     const typeNames = await prisma[type].findMany();
     // Convert array to object
@@ -77,6 +82,11 @@ async function getInvoiceSummary(req, res) {
         by: [parsedType],
         _sum: {
             price: true
+        },
+        orderBy: {
+            _sum: {
+                price: 'desc'
+            }
         },
         where: queryParams
     });
@@ -96,10 +106,13 @@ async function getInvoiceSummary(req, res) {
         // Eg.: type is 'category' and parsedType is 'categoryId'
         const typeName = namesObject[currGroup[parsedType]];
         const price = currGroup._sum.price;
-        acc[typeName] = price;
+        acc.push({
+            name: typeName,
+            price
+        });
 
         return acc;
-    }, {});
+    }, []);
 
     res.status(StatusCodes.OK).json({
         message: 'Success',
